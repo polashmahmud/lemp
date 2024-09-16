@@ -33,7 +33,7 @@ sudo nano /etc/php/8.2/fpm/pool.d/www.conf
 sudo apt install -y git
 
 # Nginx site configuration (replace with your project path)
-sudo bash -c 'cat > /etc/nginx/sites-available/your-site <<EOF
+sudo tee /etc/nginx/sites-available/your-site > /dev/null <<EOF
 server {
     root /yourproject-path/public;
     index index.php index.html index.htm;
@@ -51,7 +51,7 @@ server {
         deny all;
     }
 }
-EOF'
+EOF
 
 # Create a symbolic link for Nginx site configuration
 sudo ln -s /etc/nginx/sites-available/your-site /etc/nginx/sites-enabled/
