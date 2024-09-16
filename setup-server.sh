@@ -8,7 +8,11 @@ fi
 
 echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
 
+# Update and Upgrade system
+sudo apt update && sudo apt upgrade -y
+
 # Add PHP Repository
+sudo apt-get install ca-certificates apt-transport-https software-properties-common
 sudo add-apt-repository ppa:ondrej/php -y
 
 # Update and Upgrade system
@@ -25,7 +29,7 @@ sudo mysql_secure_installation
 sudo apt install php8.3-fpm php8.3-mysql
 
 # Install PHP Extensions
-sudo apt-get install -y php-cli php-common php-zip php-gd php-mbstring php-curl php-xml php-bcmath
+sudo apt install php8.3-mysql php8.3-imap php8.3-ldap php8.3-xml php8.3-curl php8.3-mbstring php8.3-zip
 
 # Install Composer
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
