@@ -89,18 +89,15 @@ sudo ln -s /etc/nginx/sites-available/api /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 
-# User api folder make index.php
-sudo bash -c 'cat > /home/deploy/api/public/index.php <<EOF
-<?php
-phpinfo();
-EOF'
+# Switch to new user
+su - deploy
 
-# Change api folder permission
-sudo chown -R deploy:deploy /home/deploy/api
+# Create api project folder and index.php file
+mkdir -p ~/api/public
+echo "<?php phpinfo();" > ~/api/public/index.php
 
-# Restart Nginx and PHP
-sudo systemctl restart nginx
-sudo systemctl restart php8.3-fpm
+# Switch back to root
+exit
 
 
 
