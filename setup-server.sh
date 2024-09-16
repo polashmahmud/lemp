@@ -39,3 +39,68 @@ php -r "unlink('composer-setup.php');"
 
 # Move Composer to bin
 sudo mv composer.phar /usr/local/bin/composer
+
+# Add new user (replace 'deploy' with your desired username)
+sudo adduser deploy
+
+# Change nginx and PHP user to new user
+sudo sed -i 's/user www-data;/user deploy;/g' /etc/nginx/nginx.conf
+sudo sed -i 's/user = www-data/user = deploy/g' /etc/php/8.3/fpm/pool.d/www.conf
+sudo sed -i 's/group = www-data/group = deploy/g' /etc/php/8.3/fpm/pool.d/www.conf
+
+# Restart Nginx and PHP
+sudo systemctl restart nginx
+sudo systemctl restart php8.3-fpm
+
+# Install Git
+sudo apt install git -y
+
+# Nginx site configuration file (replace 'api' with your domain)
+sudo bash -c 'cat > /etc/nginx/sites-available/api <<EOF
+server {
+    root /home/deploy/api/public;
+    index index.php index.html index.htm;
+    server_name api.ibanklegal.com www.ibanklegal.com;
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    location ~ /\.ht {
+        deny all;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+}
+
+EOF'
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/api /etc/nginx/sites-enabled/
+
+# Restart Nginx
+sudo nginx -t
+sudo systemctl restart nginx
+
+# User api folder make index.php
+sudo bash -c 'cat > /home/deploy/api/public/index.php <<EOF
+<?php
+phpinfo();
+EOF'
+
+# Change api folder permission
+sudo chown -R deploy:deploy /home/deploy/api
+
+# Restart Nginx and PHP
+sudo systemctl restart nginx
+sudo systemctl restart php8.3-fpm
+
+
+
