@@ -33,9 +33,9 @@ sudo nano /etc/php/8.2/fpm/pool.d/www.conf
 sudo apt install -y git
 
 # Nginx site configuration (replace with your project path)
-sudo bash -c "cat > /etc/nginx/sites-enabled/site-name <<EOF
+sudo bash -c 'cat > /etc/nginx/sites-available/your-site <<EOF
 server {
-    root /yourproject-path;
+    root /yourproject-path/public;
     index index.php index.html index.htm;
     server_name example.com www.example.com;
     location / {
@@ -44,17 +44,25 @@ server {
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
     }
     location ~ /\.ht {
         deny all;
     }
 }
-EOF"
+EOF'
+
+# Create a symbolic link for Nginx site configuration
+sudo ln -s /etc/nginx/sites-available/your-site /etc/nginx/sites-enabled/
 
 # Test Nginx configuration and restart service
 sudo nginx -t
 sudo systemctl restart nginx
 
-# Install SSL certificate with Certbot (replace domain)
+# Install SSL certificate with Certbot (replace with your domain)
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d example.com -d www.example.com
+
+# Reload Nginx to apply SSL changes
+sudo systemctl reload nginx
